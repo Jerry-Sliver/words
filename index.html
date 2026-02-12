@@ -1,0 +1,2082 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal Vocabulary</title>
+    <style>
+        /* 全局样式 */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        h1, h2, h3 {
+            color: #2c3e50;
+            margin-bottom: 0.5em;
+        }
+
+        /* 头部样式 */
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding: 1rem;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            color: #4a90e2;
+        }
+
+        /* 标签页样式 */
+        .tabs {
+            display: flex;
+            background: white;
+            border-radius: 10px 10px 0 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            margin-bottom: 0;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 1rem;
+            text-align: center;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab.active {
+            background-color: #ebf5fb;
+            border-bottom-color: #4a90e2;
+            font-weight: bold;
+        }
+
+        .tab-content {
+            display: none;
+            background: white;
+            padding: 2rem;
+            border-radius: 0 0 10px 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* 上传区域样式 */
+        .upload-container {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .upload-area {
+            border: 2px dashed #bdc3c7;
+            border-radius: 5px;
+            padding: 2rem;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .upload-area:hover, .upload-area.drag-over {
+            border-color: #3498db;
+            background-color: #ebf5fb;
+        }
+
+        .upload-area p {
+            color: #7f8c8d;
+            margin-bottom: 0.5rem;
+        }
+
+        .upload-area i {
+            font-size: 3rem;
+            color: #95a5a6;
+            margin-bottom: 1rem;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .upload-options {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        /* 词库管理样式 */
+        .library-management {
+            margin-bottom: 2rem;
+        }
+
+        .library-list {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #ecf0f1;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+        }
+
+        .library-item {
+            padding: 1rem;
+            border-bottom: 1px solid #ecf0f1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .library-item:last-child {
+            border-bottom: none;
+        }
+
+        .library-item.active {
+            background-color: #ebf5fb;
+        }
+
+        .word-list {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #ecf0f1;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+        }
+
+        .word-item {
+            padding: 0.5rem 1rem;
+            border-bottom: 1px solid #ecf0f1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .word-item:last-child {
+            border-bottom: none;
+        }
+
+        /* 添加单词表单样式 */
+        .add-word-form {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .add-word-form input {
+            flex: 1;
+            padding: 0.5rem;
+            border: 1px solid #bdc3c7;
+            border-radius: 5px;
+        }
+
+        /* 按钮样式 */
+        .btn {
+            background-color: #4a90e2;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .btn:hover {
+            background-color: #357abd;
+        }
+
+        .btn.danger {
+            background-color: #e74c3c;
+        }
+
+        .btn.danger:hover {
+            background-color: #c0392b;
+        }
+
+        .btn.secondary {
+            background-color: #95a5a6;
+        }
+
+        .btn.secondary:hover {
+            background-color: #7f8c8d;
+        }
+
+        .btn.success {
+            background-color: #2ecc71;
+        }
+
+        .btn.success:hover {
+            background-color: #27ae60;
+        }
+
+        .btn-icon {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #7f8c8d;
+            padding: 0.25rem;
+            border-radius: 3px;
+            transition: background-color 0.3s;
+        }
+
+        .btn-icon:hover {
+            background-color: #ecf0f1;
+        }
+
+        .btn-icon.danger:hover {
+            color: #e74c3c;
+        }
+
+        /* 学习区域样式 */
+        .learning-container {
+            width: 100%;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .word-display {
+            width: 100%;
+            padding: 2rem;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: white;
+            min-height: 500px;
+        }
+
+        .word-details {
+            width: 100%;
+            padding: 2rem;
+            background: white;
+            overflow-y: auto;
+            border-top: 1px solid #ecf0f1;
+        }
+
+        .word {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 1rem;
+        }
+
+        .definition {
+            font-size: 1.5rem;
+            color: #7f8c8d;
+            min-height: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .phonetics {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .phonetic {
+            background-color: #ecf0f1;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .phonetic i {
+            cursor: pointer;
+            color: #3498db;
+        }
+
+        /* 拼写输入框样式 */
+        .spelling-container {
+            width: 100%;
+            max-width: 600px;
+            margin: 2rem 0;
+            position: relative;
+        }
+
+        .spelling-input {
+            width: 100%;
+            padding: 1rem;
+            font-size: 2rem;
+            border: none;
+            border-bottom: 3px solid #4a90e2;
+            border-radius: 0;
+            text-align: center;
+            background: transparent;
+            outline: none;
+            letter-spacing: 2px;
+            color: transparent; /* 隐藏原始输入文字，只显示染色后的文字 */
+        }
+
+        .spelling-input.correct {
+            border-bottom-color: #2ecc71;
+        }
+
+        .spelling-input.incorrect {
+            border-bottom-color: #e74c3c;
+        }
+
+        /* 字符染色的伪元素容器（用于显示彩色字符） */
+        .spelling-highlight {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            padding: 1rem;
+            font-size: 2rem; /* 与输入框字体大小保持一致 */
+            text-align: center;
+            pointer-events: none;
+            letter-spacing: 2px;
+            color: transparent;
+            background: transparent;
+        }
+
+        .spelling-highlight span {
+            position: relative;
+        }
+
+        .spelling-highlight span.correct {
+            color: #2ecc71;
+        }
+
+        .spelling-highlight span.incorrect {
+            color: #e74c3c;
+        }
+
+        .spelling-feedback {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            min-height: 1.5rem;
+        }
+
+        .spelling-feedback.correct {
+            color: #2ecc71;
+        }
+
+        .spelling-feedback.incorrect {
+            color: #e74c3c;
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 2rem;
+            width: 100%;
+            max-width: 600px;
+        }
+
+        .progress {
+            position: absolute;
+            bottom: 1rem;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #95a5a6;
+            font-size: 0.9rem;
+        }
+
+        .word-details {
+            width: 100%;
+            padding: 2rem;
+            background: white;
+            overflow-y: auto;
+            border-top: 1px solid #ecf0f1;
+        }
+
+        .word-details.hidden {
+            display: none;
+            pointer-events: none;
+            opacity: 0;
+        }
+
+        .details-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .translations, .phrases, .sentences {
+            margin-bottom: 1.5rem;
+        }
+
+        .translations h3, .phrases h3, .sentences h3 {
+            border-bottom: 1px solid #ecf0f1;
+            padding-bottom: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .phrase-item, .sentence-item {
+            margin-bottom: 0.5rem;
+            padding: 0.5rem;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
+
+        .phrase-item .content, .sentence-item .content {
+            font-weight: bold;
+        }
+
+        .phrase-item .translation, .sentence-item .translation {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+
+        .loading {
+            text-align: center;
+            color: #3498db;
+        }
+
+        .error {
+            text-align: center;
+            color: #e74c3c;
+        }
+
+        /* 设置面板样式 */
+        .settings-panel {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .setting-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .setting-group h3 {
+            margin-bottom: 0.5rem;
+        }
+
+        .setting-options {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .setting-option {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* 底部快捷键提示样式 */
+        .shortcuts {
+            background: white;
+            padding: 1rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            margin: 0 auto;
+            max-width: 1200px;
+        }
+
+        .shortcuts ul {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            list-style: none;
+            flex-wrap: wrap;
+        }
+
+        .shortcut-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .key {
+            background-color: #ecf0f1;
+            padding: 0.2rem 0.5rem;
+            border-radius: 5px;
+            font-family: monospace;
+            font-weight: bold;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .learning-container {
+                flex-direction: column;
+            }
+
+            .shortcuts ul {
+                gap: 1rem;
+            }
+
+            .tabs {
+                flex-direction: column;
+            }
+
+            .tab {
+                border-bottom: 1px solid #ecf0f1;
+            }
+
+            .tab.active {
+                border-bottom-color: #ecf0f1;
+                border-left: 3px solid #4a90e2;
+            }
+        }
+    </style>
+    <!-- 引入Font Awesome图标库 -->
+    <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Tailwind CSS v3 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <!-- 顶部导航栏 -->
+    <nav class="bg-white shadow-md sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-3 max-w-7xl">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <a href="../index.html" class="text-blue-600 hover:text-blue-800 font-medium flex items-center">
+                        <i class="fa fa-cloud mr-2"></i>
+                        返回云上天国
+                    </a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="UserGuide.html" class="text-gray-700 hover:text-blue-600 font-medium">
+                        查看操作指南
+                    </a>
+                    <a href="mailto:973256921@qq.com" class="text-gray-700 hover:text-blue-600 font-medium">
+                        联系开发者
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+    
+    <div class="container mx-auto px-4 py-8 max-w-7xl">
+        <div class="header">
+            <h1>增强版英语单词记忆工具</h1>
+            <p>构建个人词库，智能学习与复习</p>
+        </div>
+
+        <!-- 标签页导航 -->
+        <div class="tabs">
+            <div class="tab active" data-tab="learning">听写复习</div>
+            <div class="tab" data-tab="library">词库管理</div>
+            <div class="tab" data-tab="settings">设置</div>
+        </div>
+
+    <!-- 学习模式 -->
+    <div class="tab-content active" id="learning-tab">
+        <div class="learning-container">
+            <div class="word-display">
+                <div class="phonetics" id="displayPhonetics"></div>
+                <div class="word" id="currentWord">请先选择或创建词库</div>
+                <div class="definition" id="currentDefinition"></div>
+                
+                <!-- 拼写输入容器（包含输入框和字符染色层） -->
+                <div class="spelling-container">
+                    <input type="text" class="spelling-input" id="spellingInput" inputmode="latin" placeholder="Enter you heared..." ime-mode="disabled">
+                    <div class="spelling-highlight" id="spellingHighlight"></div>
+                </div>
+                
+                <div class="spelling-feedback" id="spellingFeedback"></div>
+                <div class="navigation">
+                    <button class="btn" id="prevBtn">上一个</button>
+                    <button class="btn" id="nextBtn">下一个</button>
+                </div>
+                <div class="progress" id="progress">单词 0 / 0</div>
+            </div>
+
+            <div class="word-details" id="wordDetails">
+                <div class="details-header">
+                    <h2>详细信息</h2>
+                    <button class="btn" id="queryDetailsBtn">查询详情</button>
+                </div>
+                <div id="detailsContent">
+                    <p>请选择一个单词并点击"查询详情"按钮</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 词库管理 -->
+    <div class="tab-content" id="library-tab">
+        <!-- 上传区域 -->
+        <div class="upload-container">
+            <div class="upload-area" id="uploadArea">
+                <i class="fa fa-cloud-upload"></i>
+                <p>点击或拖拽文件到此处上传</p>
+                <p>支持 .txt 或 .json 格式</p>
+                <input type="file" id="fileInput" class="file-input" accept=".txt,.json">
+            </div>
+            <div class="upload-options">
+                <button class="btn" id="exportTxtBtn">导出为 TXT</button>
+                <button class="btn" id="exportJsonBtn">导出为 JSON</button>
+                <button class="btn danger" id="clearStorageBtn">清空本地存储</button>
+            </div>
+        </div>
+
+        <!-- 词库列表 -->
+        <div class="library-management">
+            <h3>我的词库</h3>
+            <div class="library-list" id="libraryList">
+                <!-- 词库列表将在这里动态生成 -->
+            </div>
+            <div class="library-actions" style="display: flex; gap: 1rem; margin-bottom: 2rem;">
+                <input type="text" id="newLibraryName" placeholder="新词库名称" style="flex: 1; padding: 0.5rem; border: 1px solid #bdc3c7; border-radius: 5px;">
+                <button class="btn success" id="createLibraryBtn">创建词库</button>
+            </div>
+        </div>
+
+        <!-- 当前词库单词列表 -->
+        <div class="current-library">
+            <h3 id="currentLibraryTitle">当前词库：未选择</h3>
+            <div class="add-word-form">
+                <input type="text" id="newWordInput" placeholder="输入新单词">
+                <button class="btn success" id="addWordBtn">添加单词</button>
+            </div>
+            <div class="word-list" id="wordList">
+                <!-- 单词列表将在这里动态生成 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 设置面板 -->
+    <div class="tab-content" id="settings-tab">
+        <div class="settings-panel">
+            <div class="setting-group">
+                <h3>学习设置</h3>
+                <div class="setting-options">
+                    <div class="setting-option">
+                        <input type="checkbox" id="showPhonetics" checked>
+                        <label for="showPhonetics">显示音标</label>
+                    </div>
+                    <div class="setting-option">
+                        <input type="checkbox" id="autoPlayAudio" checked>
+                        <label for="autoPlayAudio">自动播放发音</label>
+                    </div>
+                    <div class="setting-option">
+                        <input type="checkbox" id="showTranslation" checked>
+                        <label for="showTranslation">显示中文释义</label>
+                    </div>
+                    <div class="setting-option">
+                        <input type="checkbox" id="showEnglishDefinition">
+                        <label for="showEnglishDefinition">显示英文释义</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="setting-group">
+                <h3>发音设置</h3>
+                <div class="setting-options">
+                    <div class="setting-option">
+                        <input type="radio" id="britishPronunciation" name="pronunciation" value="british" checked>
+                        <label for="britishPronunciation">英式发音</label>
+                    </div>
+                    <div class="setting-option">
+                        <input type="radio" id="americanPronunciation" name="pronunciation" value="american">
+                        <label for="americanPronunciation">美式发音</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 学习模式已默认设置为拼写模式，不再显示选项 -->
+
+            <div class="setting-group">
+                <h3>复习设置</h3>
+                <div class="setting-options">
+                    <div class="setting-option">
+                        <input type="checkbox" id="showReviewWordsFirst" checked>
+                        <label for="showReviewWordsFirst">优先显示待复习单词</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="setting-group">
+                <h3>主题设置</h3>
+                <div class="setting-options">
+                    <div class="setting-option">
+                        <label for="buttonColor">按钮颜色：</label>
+                        <input type="color" id="buttonColor" value="#4a90e2">
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn success" id="saveSettingsBtn">保存设置</button>
+        </div>
+    </div>
+
+    <div class="shortcuts">
+        <ul>
+            <li class="shortcut-item"><span class="key">空格</span>下一个单词</li>
+            <li class="shortcut-item"><span class="key">←</span> 上一个单词</li>
+            <li class="shortcut-item"><span class="key">→</span> 下一个单词</li>
+            <li class="shortcut-item"><span class="key">Enter</span> 检查拼写/重新输入</li>
+        </ul>
+    </div>
+
+    <script>
+        // 全局变量
+        let libraries = {}; // 所有词库
+        let currentLibraryId = null; // 当前选中的词库ID
+        let currentIndex = 0; // 当前单词索引
+        let detailsCache = {}; // 单词详情缓存
+        let settings = {
+            showPhonetics: true,
+            autoPlayAudio: true,
+            showTranslation: true,
+            showEnglishDefinition: false,
+            pronunciation: 'british', // 'british' 或 'american'
+            learningMode: 'spelling', // 默认拼写模式，不再提供选择
+            showReviewWordsFirst: true,
+            buttonColor: '#4a90e2' // 默认按钮颜色
+        };
+
+
+
+        // 单词学习状态
+        const MASTERY_LEVELS = {
+            UNKNOWN: { name: '陌生', daysToReview: 1 },
+            FAMILIAR: { name: '模糊', daysToReview: 7 },
+            MASTERED: { name: '熟练', daysToReview: 30 }
+        };
+
+        // DOM 元素
+        const tabElements = document.querySelectorAll('.tab');
+        const tabContents = document.querySelectorAll('.tab-content');
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const exportTxtBtn = document.getElementById('exportTxtBtn');
+        const exportJsonBtn = document.getElementById('exportJsonBtn');
+        const clearStorageBtn = document.getElementById('clearStorageBtn');
+        const libraryList = document.getElementById('libraryList');
+        const newLibraryName = document.getElementById('newLibraryName');
+        const createLibraryBtn = document.getElementById('createLibraryBtn');
+        const currentLibraryTitle = document.getElementById('currentLibraryTitle');
+        const newWordInput = document.getElementById('newWordInput');
+        const addWordBtn = document.getElementById('addWordBtn');
+        const wordList = document.getElementById('wordList');
+        const currentWord = document.getElementById('currentWord');
+        const currentDefinition = document.getElementById('currentDefinition');
+        const displayPhonetics = document.getElementById('displayPhonetics');
+        const spellingInput = document.getElementById('spellingInput');
+        const spellingHighlight = document.getElementById('spellingHighlight');
+        const spellingFeedback = document.getElementById('spellingFeedback');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const progress = document.getElementById('progress');
+        const queryDetailsBtn = document.getElementById('queryDetailsBtn');
+        const detailsContent = document.getElementById('detailsContent');
+        const wordDetails = document.getElementById('wordDetails');
+        const showPhoneticsCheckbox = document.getElementById('showPhonetics');
+        const autoPlayAudioCheckbox = document.getElementById('autoPlayAudio');
+        const showTranslationCheckbox = document.getElementById('showTranslation');
+        const showEnglishDefinitionCheckbox = document.getElementById('showEnglishDefinition');
+        const britishPronunciationRadio = document.getElementById('britishPronunciation');
+        const americanPronunciationRadio = document.getElementById('americanPronunciation');
+        const showReviewWordsFirstCheckbox = document.getElementById('showReviewWordsFirst');
+        const saveSettingsBtn = document.getElementById('saveSettingsBtn');
+        const buttonColorInput = document.getElementById('buttonColor'); // 按钮颜色选择器
+
+        // 初始化
+        function init() {
+            // 从本地存储加载数据
+            loadDataFromStorage();
+            
+            // 设置事件监听器
+            setupEventListeners();
+            
+            // 更新界面
+            updateLibraryList();
+            updateWordDisplay();
+            updateSettingsDisplay();
+        }
+
+        // 从本地存储加载数据
+        function loadDataFromStorage() {
+            const storedLibraries = localStorage.getItem('vocabLibraries');
+            const storedCurrentLibraryId = localStorage.getItem('currentLibraryId');
+            const storedCurrentIndex = localStorage.getItem('currentIndex');
+            const storedDetailsCache = localStorage.getItem('detailsCache');
+            const storedSettings = localStorage.getItem('vocabSettings');
+
+            if (storedLibraries) {
+                libraries = JSON.parse(storedLibraries);
+            }
+
+            if (storedCurrentLibraryId) {
+                currentLibraryId = storedCurrentLibraryId;
+            } else if (Object.keys(libraries).length > 0) {
+                currentLibraryId = Object.keys(libraries)[0];
+            }
+
+            if (storedCurrentIndex !== null) {
+                currentIndex = parseInt(storedCurrentIndex, 10);
+            }
+
+            if (storedDetailsCache) {
+                detailsCache = JSON.parse(storedDetailsCache);
+            }
+
+            if (storedSettings) {
+                settings = { ...settings, ...JSON.parse(storedSettings) };
+            }
+        }
+
+        // 保存数据到本地存储
+        function saveDataToStorage() {
+            localStorage.setItem('vocabLibraries', JSON.stringify(libraries));
+            localStorage.setItem('currentLibraryId', currentLibraryId);
+            localStorage.setItem('currentIndex', currentIndex.toString());
+            localStorage.setItem('detailsCache', JSON.stringify(detailsCache));
+            localStorage.setItem('vocabSettings', JSON.stringify(settings));
+        }
+
+        // 设置事件监听器
+        function setupEventListeners() {
+            // 标签页切换
+            tabElements.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const tabId = tab.dataset.tab;
+                    switchTab(tabId);
+                });
+            });
+
+            // 上传区域点击事件
+            uploadArea.addEventListener('click', () => {
+                fileInput.click();
+            });
+
+            // 文件选择事件
+            fileInput.addEventListener('change', handleFileSelect);
+
+            // 拖拽事件
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.classList.add('drag-over');
+            });
+
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.classList.remove('drag-over');
+            });
+
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('drag-over');
+                
+                if (e.dataTransfer.files.length) {
+                    handleFile(e.dataTransfer.files[0]);
+                }
+            });
+
+            // 词库管理事件
+            createLibraryBtn.addEventListener('click', createNewLibrary);
+            addWordBtn.addEventListener('click', addNewWord);
+            newWordInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    addNewWord();
+                }
+            });
+
+            // 导出按钮事件
+            exportTxtBtn.addEventListener('click', exportAsTxt);
+            exportJsonBtn.addEventListener('click', exportAsJson);
+            clearStorageBtn.addEventListener('click', clearStorage);
+
+            // 学习导航按钮事件
+            prevBtn.addEventListener('click', showPreviousWord);
+            nextBtn.addEventListener('click', showNextWord);
+            queryDetailsBtn.addEventListener('click', queryWordDetails);
+
+            // 拼写输入事件
+        spellingInput.addEventListener('input', handleSpellingInput);
+        spellingInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                handleEnterKey();
+            }
+        });
+        
+        // 限制输入只能是字母和空格
+        spellingInput.addEventListener('keydown', (e) => {
+            // 允许字母、空格以及基本的编辑键
+            if (!/[a-zA-Z\s]/.test(e.key) && !['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab', 'Home', 'End'].includes(e.key)) {
+                e.preventDefault();
+            }
+        });
+
+            // 设置保存事件
+            saveSettingsBtn.addEventListener('click', saveSettings);
+
+            // 键盘事件
+            document.addEventListener('keydown', handleKeyPress);
+            
+            // 按钮颜色变化事件监听
+            buttonColorInput.addEventListener('input', () => {
+                settings.buttonColor = buttonColorInput.value;
+                updateButtonColors();
+            });
+        }
+
+        // 切换标签页
+        function switchTab(tabId) {
+            // 更新标签页状态
+            tabElements.forEach(tab => {
+                tab.classList.toggle('active', tab.dataset.tab === tabId);
+            });
+
+            // 更新内容显示
+            tabContents.forEach(content => {
+                content.classList.toggle('active', content.id === `${tabId}-tab`);
+            });
+
+            // 如果切换到词库管理标签，更新词库列表
+            if (tabId === 'library') {
+                updateLibraryList();
+                updateWordList();
+            }
+
+            // 如果切换到学习标签，更新单词显示
+            if (tabId === 'learning') {
+                updateWordDisplay();
+            }
+        }
+
+        // 处理文件选择
+        function handleFileSelect(e) {
+            if (e.target.files.length) {
+                handleFile(e.target.files[0]);
+            }
+        }
+
+        // 处理文件上传
+        function handleFile(file) {
+            const reader = new FileReader();
+            
+            reader.onload = (e) => {
+                try {
+                    const content = e.target.result;
+                    let newWords = [];
+
+                    if (file.name.endsWith('.txt')) {
+                        newWords = parseTxtFile(content);
+                    } else if (file.name.endsWith('.json')) {
+                        newWords = parseJsonFile(content);
+                    } else {
+                        alert('不支持的文件格式，请上传 .txt 或 .json 文件');
+                        return;
+                    }
+
+                    if (newWords.length === 0) {
+                        alert('未找到有效的单词，请检查文件格式');
+                        return;
+                    }
+
+                    // 创建新词库或添加到当前词库
+                    if (!currentLibraryId) {
+                        const libraryName = file.name.replace(/\.[^/.]+$/, "");
+                        createNewLibraryWithWords(libraryName, newWords);
+                    } else {
+                        const library = libraries[currentLibraryId];
+                        const existingWords = new Set(library.words.map(w => w.word.toLowerCase()));
+                        const filteredWords = newWords.filter(w => !existingWords.has(w.word.toLowerCase()));
+                        
+                        library.words = [...library.words, ...filteredWords];
+                        saveDataToStorage();
+                        updateWordList();
+                        
+                        alert(`成功导入 ${filteredWords.length} 个新单词到词库 "${library.name}"`);
+                    }
+                } catch (error) {
+                    console.error('文件解析错误:', error);
+                    alert('文件解析失败，请检查文件格式');
+                }
+            };
+
+            reader.onerror = () => {
+                alert('文件读取失败');
+            };
+
+            reader.readAsText(file);
+        }
+
+        // 解析 TXT 文件
+        function parseTxtFile(content) {
+            const lines = content.split(/\r?\n/);
+            const words = [];
+
+            for (const line of lines) {
+                // 跳过空行
+                if (!line.trim()) continue;
+
+                const parts = line.split(',');
+                if (parts.length >= 2) {
+                    const word = parts[0].trim();
+                    const definition = parts.slice(1).join(',').trim() || '无释义（可按D键查询详细信息）';
+                    
+                    if (word) {
+                        words.push({ 
+                            word, 
+                            definition,
+                            masteryLevel: 'UNKNOWN',
+                            lastReviewed: null,
+                            nextReviewDate: null,
+                            correctCount: 0,
+                            attemptCount: 0
+                        });
+                    }
+                } else if (parts.length === 1 && parts[0].trim()) {
+                    // 只有单词没有释义的情况
+                    const word = parts[0].trim();
+                    words.push({ 
+                        word, 
+                        definition: '无释义（可按D键查询详细信息）',
+                        masteryLevel: 'UNKNOWN',
+                        lastReviewed: null,
+                        nextReviewDate: null,
+                        correctCount: 0,
+                        attemptCount: 0
+                    });
+                }
+            }
+
+            return words;
+        }
+
+        // 解析 JSON 文件
+        function parseJsonFile(content) {
+            const data = JSON.parse(content);
+            const words = [];
+            
+            // 检查是否是单词数组
+            if (Array.isArray(data)) {
+                data.forEach(item => {
+                    if (typeof item === 'string') {
+                        words.push({ 
+                            word: item, 
+                            definition: '无释义（可按D键查询详细信息）',
+                            masteryLevel: 'UNKNOWN',
+                            lastReviewed: null,
+                            nextReviewDate: null,
+                            correctCount: 0,
+                            attemptCount: 0
+                        });
+                    } else if (typeof item === 'object' && item.word) {
+                        words.push({ 
+                            word: item.word, 
+                            definition: item.definition || item.translation || '无释义（可按D键查询详细信息）',
+                            masteryLevel: 'UNKNOWN',
+                            lastReviewed: null,
+                            nextReviewDate: null,
+                            correctCount: 0,
+                            attemptCount: 0
+                        });
+                    }
+                });
+            } else if (typeof data === 'object' && data.words && Array.isArray(data.words)) {
+                // 支持 { "words": [...] } 格式
+                data.words.forEach(item => {
+                    if (typeof item === 'string') {
+                        words.push({ 
+                            word: item, 
+                            definition: '无释义（可按D键查询详细信息）',
+                            masteryLevel: 'UNKNOWN',
+                            lastReviewed: null,
+                            nextReviewDate: null,
+                            correctCount: 0,
+                            attemptCount: 0
+                        });
+                    } else if (typeof item === 'object' && item.word) {
+                        words.push({ 
+                            word: item.word, 
+                            definition: item.definition || item.translation || '无释义（可按D键查询详细信息）',
+                            masteryLevel: 'UNKNOWN',
+                            lastReviewed: null,
+                            nextReviewDate: null,
+                            correctCount: 0,
+                            attemptCount: 0
+                        });
+                    }
+                });
+            } else {
+                throw new Error('JSON 格式不正确，应为单词数组或包含 words 数组的对象');
+            }
+
+            return words;
+        }
+
+        // 创建新词库
+        function createNewLibrary() {
+            const name = newLibraryName.value.trim();
+            if (!name) {
+                alert('请输入词库名称');
+                return;
+            }
+
+            const id = Date.now().toString();
+            libraries[id] = {
+                id,
+                name,
+                words: [],
+                createdAt: new Date().toISOString()
+            };
+
+            currentLibraryId = id;
+            newLibraryName.value = '';
+            
+            saveDataToStorage();
+            updateLibraryList();
+            updateWordList();
+            updateCurrentLibraryTitle();
+        }
+
+        // 创建新词库并添加单词
+        function createNewLibraryWithWords(name, words) {
+            const id = Date.now().toString();
+            libraries[id] = {
+                id,
+                name,
+                words,
+                createdAt: new Date().toISOString()
+            };
+
+            currentLibraryId = id;
+            
+            saveDataToStorage();
+            updateLibraryList();
+            updateWordList();
+            updateCurrentLibraryTitle();
+            switchTab('learning');
+            updateWordDisplay();
+        }
+
+        // 添加新单词
+        function addNewWord() {
+            if (!currentLibraryId) {
+                alert('请先选择或创建一个词库');
+                return;
+            }
+
+            const wordText = newWordInput.value.trim();
+            if (!wordText) {
+                alert('请输入单词');
+                return;
+            }
+
+            const library = libraries[currentLibraryId];
+            const existingWord = library.words.find(w => w.word.toLowerCase() === wordText.toLowerCase());
+            
+            if (existingWord) {
+                alert('该单词已存在于当前词库中');
+                return;
+            }
+
+            library.words.push({
+                word: wordText,
+                definition: '无释义（可按D键查询详细信息）',
+                masteryLevel: 'UNKNOWN',
+                lastReviewed: null,
+                nextReviewDate: null,
+                correctCount: 0,
+                attemptCount: 0
+            });
+
+            newWordInput.value = '';
+            
+            saveDataToStorage();
+            updateWordList();
+        }
+
+        // 更新词库列表
+        function updateLibraryList() {
+            libraryList.innerHTML = '';
+            
+            if (Object.keys(libraries).length === 0) {
+                libraryList.innerHTML = '<div class="library-item">暂无词库，请创建或上传</div>';
+                return;
+            }
+
+            Object.values(libraries).forEach(library => {
+                const item = document.createElement('div');
+                item.className = `library-item ${library.id === currentLibraryId ? 'active' : ''}`;
+                item.innerHTML = `
+                    <div>
+                        <strong>${library.name}</strong>
+                        <span style="color: #7f8c8d; font-size: 0.9rem;">(${library.words.length} 个单词)</span>
+                    </div>
+                    <div>
+                        <button class="btn success" onclick="selectLibrary('${library.id}')" style="padding: 0.25rem 0.5rem; margin-right: 0.5rem;">
+                            <i class="fas fa-check"></i> 选择
+                        </button>
+                        <button class="btn secondary" onclick="renameLibrary('${library.id}')" style="padding: 0.25rem 0.5rem; margin-right: 0.5rem;">
+                            <i class="fas fa-edit"></i> 重命名
+                        </button>
+                        <button class="btn danger" onclick="deleteLibrary('${library.id}')" style="padding: 0.25rem 0.5rem;">
+                            <i class="fas fa-trash"></i> 删除
+                        </button>
+                    </div>
+                `;
+                libraryList.appendChild(item);
+            });
+        }
+
+        // 更新单词列表
+        function updateWordList() {
+            wordList.innerHTML = '';
+            
+            if (!currentLibraryId || !libraries[currentLibraryId]) {
+                wordList.innerHTML = '<div class="word-item">未选择词库</div>';
+                return;
+            }
+
+            const library = libraries[currentLibraryId];
+            if (library.words.length === 0) {
+                wordList.innerHTML = '<div class="word-item">词库为空，请添加单词</div>';
+                return;
+            }
+
+            library.words.forEach((wordData, index) => {
+                const item = document.createElement('div');
+                item.className = 'word-item';
+                
+                let masteryBadge = '';
+                if (wordData.masteryLevel) {
+                    const level = MASTERY_LEVELS[wordData.masteryLevel];
+                    if (level) {
+                        masteryBadge = `<span style="background-color: ${getMasteryColor(wordData.masteryLevel)}; color: white; padding: 0.2rem 0.5rem; border-radius: 3px; font-size: 0.8rem;">${level.name}</span>`;
+                    }
+                }
+
+                item.innerHTML = `
+                    <div>
+                        <strong>${wordData.word}</strong>
+                        <span style="color: #7f8c8d; font-size: 0.9rem; margin-left: 0.5rem;">${wordData.definition}</span>
+                        ${masteryBadge}
+                    </div>
+                    <div>
+                        <button class="btn secondary" onclick="editWord(${index})" title="编辑单词" style="padding: 0.25rem 0.5rem; margin-right: 0.5rem;">
+                            <i class="fas fa-edit"></i> 编辑
+                        </button>
+                        <button class="btn danger" onclick="deleteWord(${index})" title="删除单词" style="padding: 0.25rem 0.5rem;">
+                            <i class="fas fa-trash"></i> 删除
+                        </button>
+                    </div>
+                `;
+                wordList.appendChild(item);
+            });
+        }
+
+        // 更新当前词库标题
+        function updateCurrentLibraryTitle() {
+            if (currentLibraryId && libraries[currentLibraryId]) {
+                currentLibraryTitle.textContent = `当前词库：${libraries[currentLibraryId].name} (${libraries[currentLibraryId].words.length} 个单词)`;
+            } else {
+                currentLibraryTitle.textContent = '当前词库：未选择';
+            }
+        }
+
+        // 获取熟练度对应的颜色
+        function getMasteryColor(level) {
+            switch (level) {
+                case 'MASTERED': return '#2ecc71';
+                case 'FAMILIAR': return '#f39c12';
+                case 'UNKNOWN': 
+                default: return '#e74c3c';
+            }
+        }
+
+        // 选择词库
+        function selectLibrary(id) {
+            currentLibraryId = id;
+            currentIndex = 0;
+            
+            saveDataToStorage();
+            updateLibraryList();
+            updateWordList();
+            updateCurrentLibraryTitle();
+            updateWordDisplay();
+        }
+
+        // 重命名词库
+        function renameLibrary(id) {
+            const newName = prompt('请输入新词库名称', libraries[id].name);
+            if (newName && newName.trim()) {
+                libraries[id].name = newName.trim();
+                saveDataToStorage();
+                updateLibraryList();
+                updateCurrentLibraryTitle();
+            }
+        }
+
+        // 删除词库
+        function deleteLibrary(id) {
+            // 直接删除词库，无需确认
+            delete libraries[id];
+            
+            if (currentLibraryId === id) {
+                currentLibraryId = Object.keys(libraries)[0] || null;
+                currentIndex = 0;
+            }
+            
+            saveDataToStorage();
+            updateLibraryList();
+            updateWordList();
+            updateCurrentLibraryTitle();
+            updateWordDisplay();
+        }
+
+        // 编辑单词
+        function editWord(index) {
+            if (!currentLibraryId) return;
+            
+            const library = libraries[currentLibraryId];
+            const wordData = library.words[index];
+            
+            const newWord = prompt('编辑单词', wordData.word);
+            if (newWord !== null) {
+                const trimmedWord = newWord.trim();
+                if (trimmedWord) {
+                    // 检查单词是否已存在
+                    const existingIndex = library.words.findIndex(
+                        (w, i) => i !== index && w.word.toLowerCase() === trimmedWord.toLowerCase()
+                    );
+                    
+                    if (existingIndex !== -1) {
+                        alert('该单词已存在于当前词库中');
+                        return;
+                    }
+                    
+                    wordData.word = trimmedWord;
+                    saveDataToStorage();
+                    updateWordList();
+                    updateWordDisplay();
+                }
+            }
+        }
+
+        // 删除单词
+        function deleteWord(index) {
+            if (!currentLibraryId) return;
+            
+            const library = libraries[currentLibraryId];
+            
+            // 直接删除单词，无需确认
+            library.words.splice(index, 1);
+            
+            // 如果删除的是当前显示的单词，调整索引
+            if (index === currentIndex) {
+                currentIndex = Math.min(currentIndex, library.words.length - 1);
+            } else if (index < currentIndex) {
+                currentIndex--;
+            }
+            
+            saveDataToStorage();
+            updateWordList();
+            updateWordDisplay();
+        }
+
+        // 更新单词显示
+        function updateWordDisplay() {
+            if (!currentLibraryId || !libraries[currentLibraryId] || libraries[currentLibraryId].words.length === 0) {
+                currentWord.textContent = '请先选择或创建词库';
+                currentDefinition.textContent = '';
+                displayPhonetics.innerHTML = '';
+                spellingInput.disabled = true;
+                spellingInput.value = '';
+                spellingHighlight.innerHTML = '';
+                spellingFeedback.textContent = '';
+                progress.textContent = '(0/0)';
+                // 隐藏详细信息区域
+                wordDetails.classList.add('hidden');
+                return;
+            }
+
+            const library = libraries[currentLibraryId];
+            const wordData = library.words[currentIndex];
+            
+            // 重置尝试次数（新单词）
+            wordData.currentAttempt = 0;
+            
+            // 根据学习模式显示不同内容
+            if (settings.learningMode === 'spelling') {
+                // 拼写模式：隐藏单词
+                currentWord.textContent = '';
+                
+                // 显示音标
+                if (settings.showPhonetics && wordData.details) {
+                    displayPhonetics.innerHTML = generatePhoneticsHTML(wordData.details);
+                } else {
+                    displayPhonetics.innerHTML = '';
+                }
+                
+                // 显示释义
+                currentDefinition.textContent = '';
+                
+                // 启用拼写输入
+                spellingInput.disabled = false;
+                spellingInput.value = '';
+                spellingHighlight.innerHTML = '';
+                spellingFeedback.textContent = '';
+                spellingInput.classList.remove('correct', 'incorrect');
+                
+                // 强制启用并聚焦输入框
+                setTimeout(() => {
+                    spellingInput.disabled = false;
+                    spellingInput.focus();
+                }, 100);
+                
+                // 自动播放发音
+                if (settings.autoPlayAudio && wordData.details) {
+                    playWordAudio(wordData.details);
+                } 
+                // 如果单词没有详细信息，立即查询
+                else if (!wordData.details) {
+                    queryWordDetails(false);
+                }
+                
+                // 隐藏详细信息区域
+                wordDetails.classList.add('hidden');
+            } else {
+                // 正常模式：显示单词和释义
+                currentWord.textContent = wordData.word;
+                
+                // 显示音标
+                if (settings.showPhonetics && wordData.details) {
+                    displayPhonetics.innerHTML = generatePhoneticsHTML(wordData.details);
+                } else {
+                    displayPhonetics.innerHTML = '';
+                }
+                
+                // 显示释义
+                currentDefinition.textContent = '';
+                
+                // 禁用拼写输入
+                spellingInput.disabled = true;
+                spellingInput.value = '';
+                spellingHighlight.innerHTML = '';
+                spellingFeedback.textContent = '';
+                
+                // 自动播放发音
+                if (settings.autoPlayAudio && wordData.details) {
+                    playWordAudio(wordData.details);
+                }
+                
+                // 隐藏详细信息区域
+                wordDetails.classList.add('hidden');
+            }
+
+            // 更新进度
+            progress.textContent = `(${currentIndex + 1}/${library.words.length})`;
+        }
+
+        // 生成音标HTML
+        function generatePhoneticsHTML(details) {
+            let html = '';
+            
+            if (details.ukphone) {
+                html += `
+                    <div class="phonetic">
+                        <span>英 [${details.ukphone}]</span>
+                        ${details.ukspeech ? `<i class="fa fa-volume-up" onclick="playAudio('${details.ukspeech}')"></i>` : ''}
+                    </div>
+                `;
+            }
+            
+            if (details.usphone) {
+                html += `
+                    <div class="phonetic">
+                        <span>美 [${details.usphone}]</span>
+                        ${details.usspeech ? `<i class="fa fa-volume-up" onclick="playAudio('${details.usspeech}')"></i>` : ''}
+                    </div>
+                `;
+            }
+            
+            return html;
+        }
+
+        // 播放单词音频
+        function playWordAudio(details) {
+            if (settings.pronunciation === 'british' && details.ukspeech) {
+                playAudio(details.ukspeech);
+            } else if (settings.pronunciation === 'american' && details.usspeech) {
+                playAudio(details.usspeech);
+            } else if (details.usspeech) {
+                playAudio(details.usspeech);
+            } else if (details.ukspeech) {
+                playAudio(details.ukspeech);
+            }
+        }
+
+        // 播放音频
+        function playAudio(url) {
+            const audio = new Audio(url);
+            audio.play().catch(error => {
+                console.error('音频播放失败:', error);
+            });
+        }
+
+        // 显示上一个单词
+        function showPreviousWord() {
+            if (!currentLibraryId || !libraries[currentLibraryId] || libraries[currentLibraryId].words.length === 0) return;
+            
+            const library = libraries[currentLibraryId];
+            currentIndex = (currentIndex - 1 + library.words.length) % library.words.length;
+            
+            saveDataToStorage();
+            updateWordDisplay();
+        }
+
+        // 显示下一个单词
+        function showNextWord() {
+            if (!currentLibraryId || !libraries[currentLibraryId] || libraries[currentLibraryId].words.length === 0) return;
+            
+            const library = libraries[currentLibraryId];
+            currentIndex = (currentIndex + 1) % library.words.length;
+            
+            showHint = false;
+            saveDataToStorage();
+            updateWordDisplay();
+        }
+
+
+
+        // 处理拼写输入（实时字符染色）
+        function handleSpellingInput() {
+            if (!currentLibraryId || !libraries[currentLibraryId] || libraries[currentLibraryId].words.length === 0) return;
+            
+            const library = libraries[currentLibraryId];
+            const wordData = library.words[currentIndex];
+            const input = spellingInput.value;
+            const targetWord = wordData.word;
+
+            // 生成字符染色的HTML
+            let highlightHtml = '';
+            for (let i = 0; i < input.length; i++) {
+                const char = input[i];
+                const isCorrect = i < targetWord.length && char.toLowerCase() === targetWord[i].toLowerCase();
+                highlightHtml += `<span class="${isCorrect ? 'correct' : 'incorrect'}">${char}</span>`;
+            }
+            spellingHighlight.innerHTML = highlightHtml;
+
+            // 当输入长度等于目标单词长度时，自动检查拼写
+            if (input.length === targetWord.length) {
+                checkSpelling();
+            }
+        }
+
+        // 检查拼写
+        function checkSpelling() {
+            if (!currentLibraryId || !libraries[currentLibraryId] || libraries[currentLibraryId].words.length === 0) return;
+            
+            const library = libraries[currentLibraryId];
+            const wordData = library.words[currentIndex];
+            const input = spellingInput.value.trim();
+            const targetWord = wordData.word;
+
+            // 更新当前尝试次数
+            wordData.currentAttempt = (wordData.currentAttempt || 0) + 1;
+            const currentAttempt = wordData.currentAttempt;
+
+            if (input.toLowerCase() === targetWord.toLowerCase()) {
+                // 拼写正确
+                spellingInput.classList.remove('incorrect');
+                spellingInput.classList.add('correct');
+                spellingFeedback.textContent = '✅ 拼写正确！';
+                spellingFeedback.className = 'spelling-feedback correct';
+                
+                // 更新学习记录
+                wordData.correctCount = (wordData.correctCount || 0) + 1;
+                wordData.attemptCount = (wordData.attemptCount || 0) + 1;
+                
+                // 更新熟练度
+                updateMasteryLevel(wordData);
+                
+                // 更新复习日期
+                updateReviewDate(wordData);
+                
+                // 自动显示单词详细信息
+                queryWordDetails(true);
+                
+                // 显示详细信息区域
+                wordDetails.classList.remove('hidden');
+                
+                // 禁用输入框（防止继续输入）
+                spellingInput.disabled = true;
+            } else {
+                // 拼写错误
+                spellingInput.classList.remove('correct');
+                spellingInput.classList.add('incorrect');
+                spellingFeedback.textContent = `❌ 拼写错误（第 ${currentAttempt} 次尝试）`;
+                spellingFeedback.className = 'spelling-feedback incorrect';
+                
+                // 更新尝试次数
+                wordData.attemptCount = (wordData.attemptCount || 0) + 1;
+                
+                // 三次拼写错误处理
+                if (currentAttempt >= 3) {
+                    spellingFeedback.textContent = `❌ 拼写错误，正确答案是：${targetWord}`;
+                    spellingInput.disabled = true;
+                    
+                    // 自动显示单词详细信息
+                    queryWordDetails(true);
+                    
+                    // 显示详细信息区域
+                    wordDetails.classList.remove('hidden');
+                    
+                    // 更新熟练度（保持或降低）
+                    if (wordData.masteryLevel === 'MASTERED') {
+                        wordData.masteryLevel = 'FAMILIAR';
+                    } else if (!wordData.masteryLevel) {
+                        wordData.masteryLevel = 'UNKNOWN';
+                    }
+                    
+                    // 更新复习日期（第二天复习）
+                    updateReviewDate(wordData, 1);
+                }
+            }
+            
+            saveDataToStorage();
+        }
+
+        // 处理Enter键事件
+        function handleEnterKey() {
+            if (!currentLibraryId || !libraries[currentLibraryId] || libraries[currentLibraryId].words.length === 0) return;
+            
+            const library = libraries[currentLibraryId];
+            const wordData = library.words[currentIndex];
+            const input = spellingInput.value.trim();
+            const targetWord = wordData.word;
+
+            if (!spellingInput.disabled) {
+                // 输入框未禁用
+                if (input.length === 0) {
+                    // 空输入，提示输入内容
+                    spellingFeedback.textContent = '请输入单词拼写';
+                    spellingFeedback.className = 'spelling-feedback incorrect';
+                } else if (input.toLowerCase() !== targetWord.toLowerCase()) {
+                    // 输入错误，清空搜索框
+                    spellingInput.value = '';
+                    spellingHighlight.innerHTML = '';
+                    spellingFeedback.textContent = '输入错误，已清空输入框';
+                    spellingFeedback.className = 'spelling-feedback incorrect';
+                    spellingInput.focus();
+                } else {
+                    // 输入正确，检查拼写
+                    checkSpelling();
+                }
+            } else if (spellingFeedback.className.includes('incorrect')) {
+                // 拼写错误且输入框已禁用，清空输入重新输入
+                spellingInput.disabled = false;
+                spellingInput.value = '';
+                spellingHighlight.innerHTML = '';
+                spellingFeedback.textContent = '';
+                spellingFeedback.className = 'spelling-feedback';
+                spellingInput.classList.remove('correct', 'incorrect');
+                spellingInput.focus();
+            } else if (spellingFeedback.className.includes('correct')) {
+                // 拼写正确且输入框已禁用，切换到下一个单词
+                showNextWord();
+            }
+        }
+
+        // 更新熟练度
+        function updateMasteryLevel(wordData) {
+            const correctRate = wordData.correctCount / wordData.attemptCount;
+            
+            if (wordData.attemptCount === 1 && correctRate === 1) {
+                // 一次就正确
+                wordData.masteryLevel = 'MASTERED';
+            } else if (wordData.attemptCount <= 2 && correctRate >= 0.5) {
+                // 两次内正确
+                wordData.masteryLevel = 'FAMILIAR';
+            } else {
+                // 多次尝试才正确
+                wordData.masteryLevel = 'UNKNOWN';
+            }
+        }
+
+        // 更新复习日期
+        function updateReviewDate(wordData, customDays) {
+            const today = new Date();
+            wordData.lastReviewed = today.toISOString();
+            
+            let daysToAdd;
+            if (customDays) {
+                daysToAdd = customDays;
+            } else {
+                const level = MASTERY_LEVELS[wordData.masteryLevel] || MASTERY_LEVELS.UNKNOWN;
+                daysToAdd = level.daysToReview;
+            }
+            
+            const nextReview = new Date(today);
+            nextReview.setDate(today.getDate() + daysToAdd);
+            wordData.nextReviewDate = nextReview.toISOString();
+        }
+
+        // 查询单词详细信息
+        async function queryWordDetails(autoPlay = false) {
+            if (!currentLibraryId || !libraries[currentLibraryId] || libraries[currentLibraryId].words.length === 0) return;
+
+            const library = libraries[currentLibraryId];
+            const wordData = library.words[currentIndex];
+            const word = wordData.word;
+            
+            // 检查缓存
+            if (detailsCache[word]) {
+                wordData.details = detailsCache[word];
+                saveDataToStorage();
+                displayWordDetails(detailsCache[word]);
+                
+                if (autoPlay && settings.autoPlayAudio) {
+                    playWordAudio(detailsCache[word]);
+                }
+                
+                return;
+            }
+
+            // 显示加载中
+            detailsContent.innerHTML = '<div class="loading">加载中...</div>';
+
+            try {
+                const response = await fetch(`https://v2.xxapi.cn/api/englishwords?word=${encodeURIComponent(word)}`);
+                const data = await response.json();
+
+                if (data.code === 200 && data.data) {
+                    // 缓存结果
+                    detailsCache[word] = data.data;
+                    wordData.details = data.data;
+                    
+                    // 如果单词没有释义，使用API返回的释义
+                    if (wordData.definition === '无释义（可按D键查询详细信息）' && 
+                        data.data.translations && 
+                        data.data.translations.length > 0) {
+                        wordData.definition = data.data.translations.map(t => t.tran_cn).join('；');
+                    }
+                    
+                    saveDataToStorage();
+                    
+                    // 显示结果
+                    displayWordDetails(data.data);
+                    
+                    // 只有在非自动播放（非拼写正确完成）的情况下才更新单词显示
+                    // 但不包括在updateWordDisplay()内部调用的情况
+                    if (!autoPlay) {
+                        // 更新音标显示
+                        if (settings.showPhonetics) {
+                            displayPhonetics.innerHTML = generatePhoneticsHTML(data.data);
+                        }
+                        
+                        // 自动播放发音（如果设置了的话）
+                        if (settings.autoPlayAudio) {
+                            playWordAudio(data.data);
+                        }
+                    }
+                    
+                    if (autoPlay && settings.autoPlayAudio) {
+                        playWordAudio(data.data);
+                    }
+                } else {
+                    detailsContent.innerHTML = '<div class="error">查询失败，未找到该单词的详细信息</div>';
+                }
+            } catch (error) {
+                console.error('API 请求错误:', error);
+                detailsContent.innerHTML = '<div class="error">查询失败，请检查网络连接或稍后重试</div>';
+            }
+        }
+
+        // 显示单词详细信息
+        function displayWordDetails(data) {
+            let html = '';
+
+            // 音标和发音
+            if (data.ukphone || data.usphone) {
+                html += '<div class="phonetics">';
+                if (data.ukphone) {
+                    html += `
+                        <div class="phonetic">
+                            <span>英 [${data.ukphone}]</span>
+                            ${data.ukspeech ? `<i class="fa fa-volume-up" onclick="playAudio('${data.ukspeech}')"></i>` : ''}
+                        </div>
+                    `;
+                }
+                if (data.usphone) {
+                    html += `
+                        <div class="phonetic">
+                            <span>美 [${data.usphone}]</span>
+                            ${data.usspeech ? `<i class="fa fa-volume-up" onclick="playAudio('${data.usspeech}')"></i>` : ''}
+                        </div>
+                    `;
+                }
+                html += '</div>';
+            }
+
+            // 核心释义
+            if (data.translations && data.translations.length > 0) {
+                html += '<div class="translations">';
+                html += '<h3>核心释义</h3>';
+                data.translations.forEach(translation => {
+                    if (translation.tran_cn) {
+                        html += `<p>${translation.tran_cn}</p>`;
+                    }
+                });
+                html += '</div>';
+            }
+
+            // 常用短语
+            if (data.phrases && data.phrases.length > 0) {
+                html += '<div class="phrases">';
+                html += '<h3>常用短语</h3>';
+                data.phrases.forEach(phrase => {
+                    html += `
+                        <div class="phrase-item">
+                            <div class="content">${phrase.p_content || ''}</div>
+                            <div class="translation">${phrase.p_cn || ''}</div>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+            }
+
+            // 例句
+            if (data.sentences && data.sentences.length > 0) {
+                html += '<div class="sentences">';
+                html += '<h3>例句</h3>';
+                data.sentences.forEach(sentence => {
+                    html += `
+                        <div class="sentence-item">
+                            <div class="content">${sentence.s_content || ''}</div>
+                            <div class="translation">${sentence.s_cn || ''}</div>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+            }
+
+            // 如果没有任何详细信息
+            if (html === '') {
+                html = '<p>暂无详细信息</p>';
+            }
+
+            detailsContent.innerHTML = html;
+        }
+
+        // 导出为 TXT（仅导出单词）
+        function exportAsTxt() {
+            if (!currentLibraryId || !libraries[currentLibraryId] || libraries[currentLibraryId].words.length === 0) {
+                alert('没有可导出的单词');
+                return;
+            }
+
+            const library = libraries[currentLibraryId];
+            let content = '';
+            library.words.forEach(item => {
+                content += `${item.word}\n`; // 仅导出单词本身
+            });
+
+            downloadFile(content, `${library.name}_${getCurrentDate()}.txt`, 'text/plain');
+        }
+
+        // 导出为 JSON（仅导出单词）
+        function exportAsJson() {
+            if (!currentLibraryId || !libraries[currentLibraryId] || libraries[currentLibraryId].words.length === 0) {
+                alert('没有可导出的单词');
+                return;
+            }
+
+            const library = libraries[currentLibraryId];
+            const exportData = {
+                name: library.name,
+                words: library.words.map(item => item.word), // 仅导出单词本身
+                exportedAt: new Date().toISOString()
+            };
+
+            const content = JSON.stringify(exportData, null, 2);
+            downloadFile(content, `${library.name}_${getCurrentDate()}.json`, 'application/json');
+        }
+
+        // 下载文件
+        function downloadFile(content, filename, mimeType) {
+            const blob = new Blob([content], { type: mimeType });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            
+            setTimeout(() => {
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }, 0);
+        }
+
+        // 获取当前日期（YYYYMMDD 格式）
+        function getCurrentDate() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            return `${year}${month}${day}`;
+        }
+
+        // 清空本地存储
+        function clearStorage() {
+            if (confirm('确定要清空所有本地存储的单词数据吗？此操作不可恢复。')) {
+                localStorage.removeItem('vocabLibraries');
+                localStorage.removeItem('currentLibraryId');
+                localStorage.removeItem('currentIndex');
+
+                localStorage.removeItem('detailsCache');
+                localStorage.removeItem('vocabSettings');
+                
+                libraries = {};
+                currentLibraryId = null;
+                currentIndex = 0;
+
+                detailsCache = {};
+                
+                updateLibraryList();
+                updateWordList();
+                updateCurrentLibraryTitle();
+                updateWordDisplay();
+                detailsContent.innerHTML = '<p>请选择一个单词并点击"查询详情"按钮</p>';
+                
+                alert('本地存储已清空');
+            }
+        }
+
+        // 更新设置显示
+        function updateSettingsDisplay() {
+            showPhoneticsCheckbox.checked = settings.showPhonetics;
+            autoPlayAudioCheckbox.checked = settings.autoPlayAudio;
+            showTranslationCheckbox.checked = settings.showTranslation;
+            showEnglishDefinitionCheckbox.checked = settings.showEnglishDefinition;
+            
+            if (settings.pronunciation === 'british') {
+                britishPronunciationRadio.checked = true;
+            } else {
+                americanPronunciationRadio.checked = true;
+            }
+            
+            showReviewWordsFirstCheckbox.checked = settings.showReviewWordsFirst;
+            
+            // 更新按钮颜色选择器
+            buttonColorInput.value = settings.buttonColor;
+            
+            // 应用按钮颜色
+            updateButtonColors();
+        }
+        
+        // 更新按钮颜色
+        function updateButtonColors() {
+            const buttons = document.querySelectorAll('.btn');
+            buttons.forEach(btn => {
+                if (!btn.classList.contains('danger') && !btn.classList.contains('secondary') && !btn.classList.contains('success')) {
+                    btn.style.backgroundColor = settings.buttonColor;
+                    
+                    // 计算悬停颜色（变暗10%）
+                    const color = hexToRgb(settings.buttonColor);
+                    const hoverColor = `rgb(${(color.r * 0.9).toFixed(0)}, ${(color.g * 0.9).toFixed(0)}, ${(color.b * 0.9).toFixed(0)})`;
+                    btn.style.transition = 'background-color 0.3s';
+                    
+                    // 移除旧的悬停样式
+                    btn.onmouseover = () => {
+                        btn.style.backgroundColor = hoverColor;
+                    };
+                    
+                    btn.onmouseout = () => {
+                        btn.style.backgroundColor = settings.buttonColor;
+                    };
+                }
+            });
+            
+            // 更新标题颜色
+            const header = document.querySelector('.header h1');
+            header.style.color = settings.buttonColor;
+            
+            // 更新激活标签页颜色
+            const activeTab = document.querySelector('.tab.active');
+            if (activeTab) {
+                activeTab.style.borderBottomColor = settings.buttonColor;
+            }
+        }
+        
+        // 将十六进制颜色转换为RGB
+        function hexToRgb(hex) {
+            const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            return result ? {
+                r: parseInt(result[1], 16),
+                g: parseInt(result[2], 16),
+                b: parseInt(result[3], 16)
+            } : null;
+        }
+
+        // 保存设置
+        function saveSettings() {
+            settings.showPhonetics = showPhoneticsCheckbox.checked;
+            settings.autoPlayAudio = autoPlayAudioCheckbox.checked;
+            settings.showTranslation = showTranslationCheckbox.checked;
+            settings.showEnglishDefinition = showEnglishDefinitionCheckbox.checked;
+            settings.pronunciation = britishPronunciationRadio.checked ? 'british' : 'american';
+            settings.showReviewWordsFirst = showReviewWordsFirstCheckbox.checked;
+            
+            saveDataToStorage();
+            updateWordDisplay();
+            
+            alert('设置已保存');
+        }
+
+        // 处理键盘按键
+        function handleKeyPress(e) {
+            // 如果正在输入文本，不处理快捷键
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+                return;
+            }
+
+            // 只保留必要的快捷键，移除字母键绑定
+            switch (e.key) {
+                case ' ':
+                    e.preventDefault();
+                    // 空格键新行为：拼写正确后显示详情，显示详情后切换下一个单词
+                    if (spellingFeedback.className.includes('correct')) {
+                        // 如果拼写正确，检查是否已经显示详情
+                        if (detailsContent.innerHTML !== '请选择一个单词并点击"查询详情"按钮' && detailsContent.innerHTML !== '') {
+                            // 已经显示详情，切换到下一个单词
+                            showNextWord();
+                        } else {
+                            // 未显示详情，查询并显示单词详细信息
+                            queryWordDetails(true);
+                        }
+                    }
+                    break;
+                case 'ArrowLeft':
+                    e.preventDefault();
+                    showPreviousWord();
+                    break;
+                case 'ArrowRight':
+                    e.preventDefault();
+                    showNextWord();
+                    break;
+            }
+        }
+
+        // 初始化应用
+        init();
+    </script>
+    </div>
+</body>
+</html>
